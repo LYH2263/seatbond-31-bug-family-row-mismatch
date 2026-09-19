@@ -182,35 +182,34 @@ def create_hold(body: HoldRequest, db: Session = Depends(get_db)):
     block = result.block
     if block is None:
         if result.reason == FAMILY_FULL:
-            reason = (
+            message = (
                 f"家庭排内无足够连续空座（人数 {body.party_size}，过道会切断连续段，"
                 "且带儿童请求不可使用非家庭排）"
             )
-            detail = "家庭排内连续空座不足"
         else:
-            reason = f"非家庭排无足够连续空座（人数 {body.party_size}，普通请求默认避开家庭排）"
-            detail = "非家庭排连续空座不足"
+            message = f"非家庭排无足够连续空座（人数 {body.party_size}，普通请求默认避开家庭排）"
         db.add(
             ConflictLog(
                 showtime_id=body.showtime_id,
                 party_size=body.party_size,
-                reason=reason,
+                reason=message,
             )
         )
         db.commit()
-        raise HTTPException(409, detail)
+        raise HTTPException(409, message)
 
     hits = conflicts_with(holds, block)
     if hits:
+        message = f"与既有持座冲突：第{hits[0].row}排 {hits[0].start_col}-{hits[0].end_col}"
         db.add(
             ConflictLog(
                 showtime_id=body.showtime_id,
                 party_size=body.party_size,
-                reason=f"与既有持座重叠：第{hits[0].row}排 {hits[0].start_col}-{hits[0].end_col}",
+                reason=message,
             )
         )
         db.commit()
-        raise HTTPException(409, "与既有持座冲突")
+        raise HTTPException(409, message)
 
     code = f"SB-{int(datetime.utcnow().timestamp()) % 100000:05d}"
     hold = SeatHold(

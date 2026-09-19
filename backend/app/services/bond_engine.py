@@ -143,7 +143,7 @@ def search_bond(
     Ordinary requests search only non-family rows and never fall back into
     family rows, returning GENERAL_FULL when the ordinary area is exhausted.
     """
-    allowed_rows = {r for r in seats_by_row if (r in family_rows) != with_children}
+    allowed_rows = {r for r in seats_by_row if (r in family_rows) == with_children}
     if with_children and not family_rows:
         return BondSearchResult(block=None, reason=FAMILY_FULL)
     if not allowed_rows:

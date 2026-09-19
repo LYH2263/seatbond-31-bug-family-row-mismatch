@@ -92,7 +92,7 @@ export default function HoldPage() {
       </div>
       <p className="hint">
         带儿童的请求只在金色家庭排内找连座；普通请求默认避开家庭排，把亲子区留给家庭观众。
-        过道会切断连续段，家庭排内段长不足时会直接报“家庭排内连续空座不足”。
+        过道会切断连续段，家庭排内段长不足时直接失败提示，不会转去非家庭排凑合。
       </p>
       {msg && <div className="ok">{msg}</div>}
       {err && <div className="err">{err}</div>}
